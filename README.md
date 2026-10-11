@@ -1,6 +1,6 @@
-## Joking around with "core:net"
+## Joking around with "core:net"!
 
-### how to use
+### How to use
 ```Bash
 # as a client
 p2p <insert ipv4 here>
@@ -8,7 +8,7 @@ p2p <insert ipv4 here>
 p2p <insert ipv4 here> server
 ```
 
-### how to build
+### How to build
 ```Bash
 # standard stuff
 odin build .
