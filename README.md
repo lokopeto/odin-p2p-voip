@@ -11,5 +11,5 @@ p2p <insert ipv4 here> server
 ### How to build
 ```Bash
 # standard stuff
-odin build .
+odin build . -out:p2p
 ```
