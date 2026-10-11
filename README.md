@@ -9,7 +9,7 @@ p2p <insert ipv4 here> server
 ```
 
 ### how to build
-```Odin
+```Bash
 # standard stuff
 odin build .
 ```
