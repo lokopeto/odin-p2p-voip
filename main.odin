@@ -1,5 +1,8 @@
 package main
 
+import "core:time"
+import "core:bytes"
+import "core:encoding/cbor"
 import "core:mem"
 import "base:runtime"
 import "core:fmt"
@@ -17,13 +20,14 @@ socket: net.UDP_Socket
 PORT :: 12345
 is_server: bool
 
-input : [1024*10]byte
+input : [BUFFER_MAX]byte
 input_len : u32
 
 OUTPUT_BUFFER_MAX :: 4
+BUFFER_MAX :: 20 * mem.Kilobyte
 output_read_head : u32
 output_write_head: u32
-output : [OUTPUT_BUFFER_MAX][1200]byte
+output : [OUTPUT_BUFFER_MAX][BUFFER_MAX]byte
 
 
 is_connected : bool
@@ -72,9 +76,9 @@ main :: proc() {
 
 	{
 		config := ma.device_config_init(.duplex)
-		config.playback.format   = .u8;
+		config.playback.format   = .f32;
 		config.playback.channels = 1;
-		config.capture.format    = .u8;
+		config.capture.format    = .f32;
 		config.capture.channels  = 1;
 		config.sampleRate        = 48000;
 		config.dataCallback      = data_callback;
@@ -94,15 +98,18 @@ main :: proc() {
 // 			} else {
 // 
 // 			}
+			bf : bytes.Buffer
+			bytes.buffer_write_slice(&bf,(cast([^]f32)i)[:l])
+
 			if is_server {
 				if is_connected {
-					fmt.println(net.send(socket, (cast([^]u8)i)[:l], endpoint))
+					fmt.println(net.send(socket, bytes.buffer_to_bytes(&bf), endpoint))
 				}
 				// recv_bytes, endpoint, recv_err = net.recv(socket, buff[:])
 			} else {
-				fmt.println(net.send(socket, (cast([^]u8)i)[:l], { ip, PORT }))
+				fmt.println(net.send(socket, bytes.buffer_to_bytes(&bf), { ip, PORT }))
 			}
-			
+			bytes.buffer_destroy(&bf)
 
 			if input_len != l do input_len = l
 			mem.copy(&input, i, int(l))
@@ -121,6 +128,7 @@ main :: proc() {
 	assert(ma_device_start_res == .SUCCESS, fmt.tprint("Failed to Start Device: "))
 
 	for {
+		time.sleep(1 * time.Second)
 		// fmt.println(output_read_head, output_write_head)
 	}
 }
